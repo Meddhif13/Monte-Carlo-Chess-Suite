@@ -197,24 +197,6 @@ Artifacts will appear under `logs/` (CSV, PGN, Markdown summaries) and can be re
 - pgn-extract: https://www.cs.kent.ac.uk/people/staff/djb/pgn-extract/
 - Python-Easy-Chess-GUI: https://github.com/fsmosca/Python-Easy-Chess-GUI
 
-## Grading
-
-This project was graded 15/20
-Download the files including the Images, Engines and Book directories. You can use your favorite uci chess engine like stockfish by copying it into the engines dir.
-* Python 3<br>
-https://www.python.org/downloads/
-* Python-Chess<br>
-https://github.com/niklasf/python-chess<br>
-pip install python-chess
-* PySimpleGUI<br>
-https://github.com/PySimpleGUI/PySimpleGUI<br>
-pip install pysimplegui
-* Pyperclip<br>
-https://github.com/asweigart/pyperclip<br>
-pip install pyperclip
-2. If you want to run from the exe
-* Download the exe file from the release link
-
 ### D. How to
 #### To start the gui
 * Execute python_easy_chess_gui.py<br>
