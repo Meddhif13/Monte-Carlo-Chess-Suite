@@ -233,5 +233,3 @@ https://github.com/pyinstaller/pyinstaller
 https://www.cs.kent.ac.uk/people/staff/djb/pgn-extract/
 * Python-Easy-Chess-GUI<br>
 https://github.com/fsmosca/Python-Easy-Chess-GUI
-
-This project was graded 15/20
