@@ -197,7 +197,7 @@ Artifacts will appear under `logs/` (CSV, PGN, Markdown summaries) and can be re
 - pgn-extract: https://www.cs.kent.ac.uk/people/staff/djb/pgn-extract/
 - Python-Easy-Chess-GUI: https://github.com/fsmosca/Python-Easy-Chess-GUI
 
-### D. How to
+### How to:
 #### To start the gui
 * Execute python_easy_chess_gui.py<br>
 Typical command line:<br>
@@ -233,5 +233,3 @@ https://github.com/pyinstaller/pyinstaller
 https://www.cs.kent.ac.uk/people/staff/djb/pgn-extract/
 * Python-Easy-Chess-GUI<br>
 https://github.com/fsmosca/Python-Easy-Chess-GUI
-
-This project was graded 15/20
