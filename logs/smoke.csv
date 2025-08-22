@@ -1,0 +1,7 @@
+timestamp,white,black,playouts,seed,max_steps,adjudicate,material_threshold,processes,ucb_c,c_puct,use_eval_priors,rollout_steps,use_eval_leaf,ab_leaf_depth,ab_depth_white,ab_depth_black,grave_K,eval_adjudicate,eval_threshold_cp,random_openings,resign_threshold_cp,resign_moves,stockfish_path,sf_depth,sf_nodes,sf_movetime_ms,sf_threads,sf_hash_mb,sf_skill,sf_limit_strength,sf_elo,moves,game_seconds,total_playouts,nps_playouts,nodes,depth,elapsed,result
+2025-08-20 22:14:52,UCB,UCT,50,0,80,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,23,2.592,1150,443.7,,,,1/2-1/2
+2025-08-20 22:15:01,UCB,PUTC,50,0,80,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,80,9.038,4000,442.6,,,,1-0
+2025-08-20 22:15:04,UCT,UCB,50,0,80,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,23,2.665,1150,431.4,,,,1/2-1/2
+2025-08-20 22:15:12,UCT,PUTC,50,0,80,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,80,8.723,4000,458.5,,,,0-1
+2025-08-20 22:15:19,PUTC,UCB,50,0,80,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,58,6.803,2900,426.3,,,,1/2-1/2
+2025-08-20 22:15:27,PUTC,UCT,50,0,80,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,69,7.870,3450,438.4,,,,1/2-1/2

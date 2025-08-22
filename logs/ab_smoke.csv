@@ -1,0 +1,3 @@
+timestamp,white,black,playouts,seed,max_steps,adjudicate,material_threshold,processes,ucb_c,c_puct,use_eval_priors,rollout_steps,use_eval_leaf,ab_leaf_depth,ab_depth_white,ab_depth_black,grave_K,eval_adjudicate,eval_threshold_cp,random_openings,resign_threshold_cp,resign_moves,stockfish_path,sf_depth,sf_nodes,sf_movetime_ms,sf_threads,sf_hash_mb,sf_skill,sf_limit_strength,sf_elo,moves,game_seconds,total_playouts,nps_playouts,nodes,depth,elapsed,result
+2025-08-20 22:16:30,AB,UCB,30,0,60,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,0,0.101,0,0.0,,,,1/2-1/2
+2025-08-20 22:16:30,UCB,AB,30,0,60,True,1,1,0.8,0.8,False,200,False,0,3,3,100.0,False,200,0,0,0,,12,0,0,1,64,,0,,1,0.212,30,141.8,,,,1/2-1/2
