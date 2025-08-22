@@ -24,7 +24,7 @@ Engines/*
 /pecg_user.json
 
 # Ignore Python virtual environment and cache
-env/
+.venv/
 __pycache__/
 .DS_Store
 *.pyc
@@ -32,3 +32,4 @@ __pycache__/
 .vscode/
 .idea/
 Thumbs.db
+figs_refined/

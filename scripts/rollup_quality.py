@@ -32,21 +32,27 @@ def main():
     # Accumulators per strategy
     agg = defaultdict(lambda: {
         "games": 0,
-        "moves": 0,
+        "moves": 0,              # total plies (half-moves) across all games the strategy appeared in (both colors counted separately)
         "wins": 0,
         "draws": 0,
         "losses": 0,
-        "acpl_sum": 0.0,
-    "acc_sum": 0.0,
-        "best_sum": 0.0,
-        "best_moves": 0,  # count moves considered in best% denominator
+        # Game-averaged accumulators (legacy)
+        "acpl_game_sum": 0.0,
+        "acc_game_sum": 0.0,
+        "best_pct_game_sum": 0.0,
+        # Move-weighted accumulators (new, estimated from per-game move counts)
+        "acpl_loss_total": 0.0,   # sum of centipawn losses over that side's moves (estimated)
+        "acc_weighted_total": 0.0,# sum of per-move accuracies
+        "side_moves": 0,          # estimated total number of moves (by that side) seen
+        "best_moves_est": 0.0,    # estimated count of best moves from per-game percentage * side_moves_game
+        # Error counts
         "inacc": 0,
         "mistakes": 0,
         "blunders": 0,
     })
 
-    def update_for_side(strategy, is_white, row):
-        # result handling
+    def update_for_side(strategy: str, is_white: bool, row: dict):
+        # Result handling from perspective of the given side
         res = row.get("result", "*")
         if is_white:
             if res == "1-0":
@@ -63,9 +69,14 @@ def main():
             elif res == "1/2-1/2":
                 agg[strategy]["draws"] += 1
 
-        moves = int(row.get("moves", 0))
+        total_plies = int(row.get("moves", 0))  # total half-moves in game
         agg[strategy]["games"] += 1
-        agg[strategy]["moves"] += moves
+        agg[strategy]["moves"] += total_plies
+
+        # Estimate number of moves played by this side in the game
+        side_moves_game = (total_plies + 1) // 2 if is_white else total_plies // 2
+        if side_moves_game < 0:
+            side_moves_game = 0
 
         if is_white:
             acpl = safe_float(row.get("white_acpl", 0.0))
@@ -82,10 +93,18 @@ def main():
             mistakes = int(row.get("black_mistakes", 0))
             blunders = int(row.get("black_blunders", 0))
 
-        agg[strategy]["acpl_sum"] += acpl
-        agg[strategy]["acc_sum"] += acc
-        agg[strategy]["best_sum"] += best_pct
-        agg[strategy]["best_moves"] += moves  # approximate denominator alignment
+        # Game-level (legacy style averaging)
+        agg[strategy]["acpl_game_sum"] += acpl
+        agg[strategy]["acc_game_sum"] += acc
+        agg[strategy]["best_pct_game_sum"] += best_pct
+
+        # Move-weighted (preferred) accumulators
+        agg[strategy]["acpl_loss_total"] += acpl * side_moves_game
+        agg[strategy]["acc_weighted_total"] += acc * side_moves_game
+        agg[strategy]["side_moves"] += side_moves_game
+        agg[strategy]["best_moves_est"] += (best_pct / 100.0) * side_moves_game
+
+        # Error tallies
         agg[strategy]["inacc"] += inacc
         agg[strategy]["mistakes"] += mistakes
         agg[strategy]["blunders"] += blunders
@@ -107,19 +126,28 @@ def main():
         w = csv.writer(f)
         w.writerow([
             "strategy", "games", "moves", "wins", "draws", "losses",
-            "acpl_mean", "accuracy_mean", "best_move_pct_mean",
+            # Game-averaged metrics (legacy)
+            "acpl_game_mean", "accuracy_game_mean", "best_move_pct_game_mean",
+            # Move-weighted metrics (preferred)
+            "acpl_move_mean", "accuracy_move_mean", "best_move_pct_move_mean",
             "inacc_per100", "mistakes_per100", "blunders_per100"
         ])
         for strat, s in sorted(agg.items()):
             games = s["games"] or 1
-            moves = s["moves"] or 1
-            acpl_mean = s["acpl_sum"] / games
-            acc_mean = s["acc_sum"] / games
-            best_pct_mean = s["best_sum"] / games
-            per100 = lambda x: 100.0 * x / moves
+            total_plies = s["moves"] or 1
+            side_moves = s["side_moves"] or 1
+            acpl_game_mean = s["acpl_game_sum"] / games
+            acc_game_mean = s["acc_game_sum"] / games
+            best_pct_game_mean = s["best_pct_game_sum"] / games
+            # Move-weighted means
+            acpl_move_mean = s["acpl_loss_total"] / side_moves if side_moves else 0.0
+            accuracy_move_mean = s["acc_weighted_total"] / side_moves if side_moves else 0.0
+            best_move_pct_move_mean = (s["best_moves_est"] / side_moves * 100.0) if side_moves else 0.0
+            per100 = lambda x: 100.0 * x / side_moves
             w.writerow([
                 strat, s["games"], s["moves"], s["wins"], s["draws"], s["losses"],
-                f"{acpl_mean:.1f}", f"{acc_mean:.1f}", f"{best_pct_mean:.1f}",
+                f"{acpl_game_mean:.1f}", f"{acc_game_mean:.1f}", f"{best_pct_game_mean:.1f}",
+                f"{acpl_move_mean:.1f}", f"{accuracy_move_mean:.1f}", f"{best_move_pct_move_mean:.1f}",
                 f"{per100(s['inacc']):.2f}", f"{per100(s['mistakes']):.2f}", f"{per100(s['blunders']):.2f}",
             ])
 
@@ -128,18 +156,24 @@ def main():
     with open(out_md, "w", encoding="utf-8") as f:
         f.write("# Quality rollup by strategy\n\n")
         f.write(f"Source: {args.input}\n\n")
-        f.write("| Strategy | Games | W | D | L | ACPL | Acc% | Best% | Inacc/100 | Mistakes/100 | Blunders/100 |\n")
-        f.write("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
+        f.write("Game-averaged metrics (legacy): ACPL/Acc% averaged per game (unweighted). Move-weighted metrics prefer per-move fidelity.\n\n")
+        f.write("| Strategy | Games | W | D | L | ACPL(g) | Acc%(g) | Best%(g) | ACPL(m) | Acc%(m) | Best%(m) | Inacc/100 | Mistakes/100 | Blunders/100 |\n")
+        f.write("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
         for strat, s in sorted(agg.items()):
             games = s["games"] or 1
-            moves = s["moves"] or 1
-            acpl_mean = s["acpl_sum"] / games
-            acc_mean = s["acc_sum"] / games
-            best_pct_mean = s["best_sum"] / games
-            per100 = lambda x: 100.0 * x / moves
+            side_moves = s["side_moves"] or 1
+            acpl_game_mean = s["acpl_game_sum"] / games
+            acc_game_mean = s["acc_game_sum"] / games
+            best_pct_game_mean = s["best_pct_game_sum"] / games
+            acpl_move_mean = s["acpl_loss_total"] / side_moves if side_moves else 0.0
+            accuracy_move_mean = s["acc_weighted_total"] / side_moves if side_moves else 0.0
+            best_move_pct_move_mean = (s["best_moves_est"] / side_moves * 100.0) if side_moves else 0.0
+            per100 = lambda x: 100.0 * x / side_moves
             f.write(
                 f"| {strat} | {s['games']} | {s['wins']} | {s['draws']} | {s['losses']} | "
-                f"{acpl_mean:.1f} | {acc_mean:.1f} | {best_pct_mean:.1f} | {per100(s['inacc']):.2f} | {per100(s['mistakes']):.2f} | {per100(s['blunders']):.2f} |\n"
+                f"{acpl_game_mean:.1f} | {acc_game_mean:.1f} | {best_pct_game_mean:.1f} | "
+                f"{acpl_move_mean:.1f} | {accuracy_move_mean:.1f} | {best_move_pct_move_mean:.1f} | "
+                f"{per100(s['inacc']):.2f} | {per100(s['mistakes']):.2f} | {per100(s['blunders']):.2f} |\n"
             )
     print(f"Wrote: {out_csv}")
     print(f"Wrote: {out_md}")
